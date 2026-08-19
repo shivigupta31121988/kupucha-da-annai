@@ -1,0 +1,14 @@
+:root{
+  --bg:#f3efe8;
+  --tile:#f9a826;
+  --tile-dark:#e07b00;
+}
+body{font-family:Inter,system-ui,Arial,sans-serif;background:var(--bg);margin:0;padding:20px}
+.app{max-width:420px;margin:0 auto}
+h1{text-align:center;text-transform:lowercase}
+.board{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+.tile{background:linear-gradient(180deg,var(--tile),var(--tile-dark));padding:16px;border-radius:12px;color:#fff;box-shadow:0 6px 0 rgba(0,0,0,0.08)}
+.tile .symbol{font-weight:700;font-size:18px}
+.tile .name{font-size:12px;opacity:0.9}
+.tile .rates{font-size:12px;margin-top:8px}
+.tile .buy{margin-top:10px;background:#fff;color:var(--tile-dark);border:none;padding:8px 12px;border-radius:8px;font-weight:600}
