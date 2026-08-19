@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from 'react'
 import axios from 'axios'
+import Orders from './Orders'
 
 function Tile({stock}){
   return (
@@ -19,6 +20,7 @@ function Tile({stock}){
 export default function App(){
   const [stocks, setStocks] = useState([])
   const [token, setToken] = useState(localStorage.getItem('token'))
+  const [showOrders, setShowOrders] = useState(false)
 
   useEffect(()=>{
     // capture token from URL after OAuth redirect
@@ -84,6 +86,7 @@ export default function App(){
       <div style={{display:'flex',justifyContent:'space-between',alignItems:'center'}}>
         <h1 style={{margin:0}}>kupucha</h1>
         <div>
+          <button onClick={()=>setShowOrders(true)} style={{marginRight:8}}>Orders</button>
           {token ? <button onClick={logout}>Logout</button> : <button onClick={loginGoogle}>Login with Google</button>}
         </div>
       </div>
@@ -97,6 +100,7 @@ export default function App(){
       <div className="board">
         {stocks.map(s => <div key={s.symbol} onDoubleClick={()=>editStock(s)}><Tile stock={s} /><div style={{height:8}}/><button onClick={()=>placeOrder(s)}>Buy</button></div>)}
       </div>
+      {showOrders && <Orders onClose={()=>setShowOrders(false)} />}
     </div>
   )
 }
