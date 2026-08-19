@@ -4,6 +4,8 @@ import axios from 'axios'
 export default function Orders({onClose}){
   const [orders, setOrders] = useState([])
   const [loading, setLoading] = useState(false)
+  const [orderToCancel, setOrderToCancel] = useState(null)
+  const [cancelling, setCancelling] = useState(false)
 
   const fetchOrders = async () => {
     setLoading(true)
@@ -16,6 +18,24 @@ export default function Orders({onClose}){
   }
 
   useEffect(()=>{ fetchOrders() }, [])
+
+  const confirmCancel = (order) => {
+    setOrderToCancel(order)
+  }
+
+  const doCancel = async () => {
+    if (!orderToCancel) return
+    setCancelling(true)
+    try{
+      await axios.post(`/api/orders/${orderToCancel.id}/cancel`)
+      await fetchOrders()
+      setOrderToCancel(null)
+    }catch(e){
+      alert('Cancel failed')
+    }finally{setCancelling(false)}
+  }
+
+  const closeModal = () => setOrderToCancel(null)
 
   return (
     <div className="orders-panel">
@@ -38,10 +58,25 @@ export default function Orders({onClose}){
               <div className="col status">{o.status}</div>
               <div className="col time">{o.executedAt ? new Date(o.executedAt).toLocaleString() : new Date(o.createdAt).toLocaleString()}</div>
               <div style={{marginLeft:8}}>
-                {o.status === 'scheduled' && <button onClick={()=>{ axios.post(`/api/orders/${o.id}/cancel`).then(fetchOrders).catch(()=>alert('Cancel failed')) }}>Cancel</button>}
+                {o.status === 'scheduled' && <button onClick={()=>confirmCancel(o)}>Cancel</button>}
               </div>
             </div>
           ))}
+        </div>
+      )}
+
+      {orderToCancel && (
+        <div className="modal-backdrop">
+          <div className="modal">
+            <div style={{marginBottom:12}}>
+              <strong>Cancel Order</strong>
+              <div style={{fontSize:13, color:'#444'}}>Are you sure you want to cancel order <strong>{orderToCancel.symbol}</strong> x{orderToCancel.quantity}?</div>
+            </div>
+            <div className="modal-actions">
+              <button onClick={closeModal} disabled={cancelling}>No</button>
+              <button onClick={doCancel} disabled={cancelling} style={{marginLeft:8}}>{cancelling ? 'Cancelling...' : 'Yes, cancel'}</button>
+            </div>
+          </div>
         </div>
       )}
     </div>
