@@ -1,3 +1,4 @@
+using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.AspNetCore.Authentication.Google;
 using Microsoft.AspNetCore.Authentication.OpenIdConnect;
@@ -32,7 +33,6 @@ builder.Services.AddAuthentication(options =>
 			var token = CreateJwt(email, jwtKey);
 			var redirect = frontendUrl + $"/?token={token}";
 			ctx.Response.Redirect(redirect);
-			ctx.HandleResponse();
 			return Task.CompletedTask;
 		};
 	})
@@ -53,7 +53,6 @@ builder.Services.AddAuthentication(options =>
 				var token = CreateJwt(email, jwtKey);
 				var redirect = frontendUrl + $"/?token={token}";
 				ctx.Response.Redirect(redirect);
-				ctx.HandleResponse();
 				return Task.CompletedTask;
 			}
 		};
