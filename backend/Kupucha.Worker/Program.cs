@@ -2,6 +2,7 @@ using System.Text;
 using RabbitMQ.Client;
 using RabbitMQ.Client.Events;
 using Kupucha.Api.Models;
+using Kupucha.Api;
 
 Console.WriteLine("Kupucha.Worker starting - will consume scheduled orders (demo)...");
 
