@@ -67,12 +67,12 @@ app.MapControllers();
 
 app.MapGet("/auth/google", (HttpContext http) =>
 {
-	return Results.Challenge(new AuthenticationProperties { RedirectUri = "/" }, "Google");
+	return Results.Challenge(new AuthenticationProperties { RedirectUri = "/" }, new[] { "Google" });
 });
 
 app.MapGet("/auth/apple", (HttpContext http) =>
 {
-	return Results.Challenge(new AuthenticationProperties { RedirectUri = "/" }, "Apple");
+	return Results.Challenge(new AuthenticationProperties { RedirectUri = "/" }, new[] { "Apple" });
 });
 
 app.Run();
