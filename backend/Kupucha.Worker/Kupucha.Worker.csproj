@@ -10,5 +10,8 @@
   <ItemGroup>
     <PackageReference Include="RabbitMQ.Client" Version="6.4.0" />
   </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\Kupucha.Api\Kupucha.Api.csproj" />
+  </ItemGroup>
 
 </Project>

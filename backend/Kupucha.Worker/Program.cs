@@ -1,6 +1,7 @@
 using System.Text;
 using RabbitMQ.Client;
 using RabbitMQ.Client.Events;
+using Kupucha.Api.Models;
 
 Console.WriteLine("Kupucha.Worker starting - will consume scheduled orders (demo)...");
 
@@ -24,25 +25,47 @@ try
         var close = new TimeSpan(16, 0, 0);
         var marketOpen = utc >= open && utc <= close;
 
-        if (marketOpen)
+        try
         {
-            Console.WriteLine($"[Worker] Executing order: {msg}");
-            // ack
-            channel.BasicAck(deliveryTag: ea.DeliveryTag, multiple: false);
+            var order = System.Text.Json.JsonSerializer.Deserialize<Order>(msg);
+            if (order == null)
+            {
+                Console.WriteLine("[Worker] Failed to deserialize order");
+                channel.BasicAck(deliveryTag: ea.DeliveryTag, multiple: false);
+                return;
+            }
+
+            if (marketOpen)
+            {
+                Console.WriteLine($"[Worker] Executing order: {order.Id} {order.Symbol} x{order.Quantity}");
+                // mark executed in InMemoryStore if present
+                if (InMemoryStore.Orders.TryGetValue(order.Id, out var existing))
+                {
+                    var executed = existing with { Status = "executed", ExecutedAt = DateTime.UtcNow, ExecutedPrice = order.Price ?? existing.Price };
+                    InMemoryStore.Orders[order.Id] = executed;
+                    Console.WriteLine($"[Worker] Order {order.Id} marked executed.");
+                }
+
+                channel.BasicAck(deliveryTag: ea.DeliveryTag, multiple: false);
+            }
+            else
+            {
+                Console.WriteLine($"[Worker] Market closed, requeueing: {order.Id}");
+                channel.BasicNack(deliveryTag: ea.DeliveryTag, multiple: false, requeue: true);
+                Thread.Sleep(1000);
+            }
         }
-        else
+        catch (Exception ex)
         {
-            Console.WriteLine($"[Worker] Market closed, requeueing: {msg}");
-            // requeue for later (simple approach)
-            channel.BasicNack(deliveryTag: ea.DeliveryTag, multiple: false, requeue: true);
-            Thread.Sleep(1000); // small delay to avoid tight loop in demo
+            Console.WriteLine($"[Worker] Error processing message: {ex.Message}");
+            // ack to drop bad message
+            channel.BasicAck(deliveryTag: ea.DeliveryTag, multiple: false);
         }
     };
 
     channel.BasicConsume(queue: "orders", autoAck: false, consumer: consumer);
 
     Console.WriteLine("Worker connected and waiting for messages. Press Ctrl+C to exit.");
-    // keep running
     await Task.Delay(-1);
 }
 catch (Exception ex)

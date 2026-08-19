@@ -35,3 +35,14 @@ git remote add origin https://github.com/shivigupta31121988/kupucha-da-annai.git
 git branch -M main
 git push -u origin main
 ```
+
+OAuth & Auth setup
+
+- To enable Google sign-in, create credentials at https://console.developers.google.com, then set `GOOGLE_CLIENT_ID` and `GOOGLE_CLIENT_SECRET` as environment variables (or in `docker-compose.yml` under `backend.environment`).
+- For Apple sign-in you must register the App ID and keys with Apple; set `APPLE_CLIENT_ID` and related key configuration in the environment. Apple integration requires additional setup; this scaffold includes a placeholder `OpenIdConnect` configuration.
+- Set `JWT_KEY` to a secure secret to sign JWTs (change the default in `docker-compose.yml`).
+
+Authentication flow (demo):
+- Visit `http://localhost:3000` and click "Login with Google". The backend will redirect to Google and on success issue a JWT and redirect back to the frontend with `?token=...` in the URL.
+- The frontend will store the token in `localStorage` for demo purposes.
+

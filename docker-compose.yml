@@ -25,6 +25,11 @@ services:
       - sqlserver
     environment:
       - RABBIT_HOST=rabbitmq
+      - FRONTEND_URL=http://localhost:3000
+      - JWT_KEY=change_me_to_a_secure_value
+      - GOOGLE_CLIENT_ID=
+      - GOOGLE_CLIENT_SECRET=
+      - APPLE_CLIENT_ID=
     ports:
       - "5000:5000"
 

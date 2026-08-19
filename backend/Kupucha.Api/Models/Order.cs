@@ -9,4 +9,6 @@ public record Order
     public string Side { get; init; } = "buy";
     public string Status { get; init; } = "scheduled"; // scheduled, executed
     public DateTime CreatedAt { get; init; } = DateTime.UtcNow;
+    public DateTime? ExecutedAt { get; init; }
+    public decimal? ExecutedPrice { get; init; }
 }

@@ -18,6 +18,20 @@ function Tile({stock}){
 
 export default function App(){
   const [stocks, setStocks] = useState([])
+  const [token, setToken] = useState(localStorage.getItem('token'))
+
+  useEffect(()=>{
+    // capture token from URL after OAuth redirect
+    const params = new URLSearchParams(window.location.search);
+    const t = params.get('token');
+    if (t) {
+      localStorage.setItem('token', t);
+      setToken(t);
+      params.delete('token');
+      const newUrl = window.location.pathname + (params.toString() ? ('?' + params.toString()) : '');
+      window.history.replaceState({}, '', newUrl);
+    }
+  }, []);
 
   const refresh = () => {
     axios.get('/api/stocks').then(r=> setStocks(r.data)).catch(()=>{})
@@ -56,9 +70,23 @@ export default function App(){
     }
   }
 
+  const loginGoogle = () => {
+    window.location.href = '/auth/google';
+  }
+
+  const logout = () => {
+    localStorage.removeItem('token');
+    setToken(null);
+  }
+
   return (
     <div className="app">
-      <h1>kupucha</h1>
+      <div style={{display:'flex',justifyContent:'space-between',alignItems:'center'}}>
+        <h1 style={{margin:0}}>kupucha</h1>
+        <div>
+          {token ? <button onClick={logout}>Logout</button> : <button onClick={loginGoogle}>Login with Google</button>}
+        </div>
+      </div>
       <div style={{display:'flex',justifyContent:'space-between',alignItems:'center',marginBottom:12}}>
         <div/>
         <div>
