@@ -37,6 +37,9 @@ export default function Orders({onClose}){
               <div className="col side">{o.side}</div>
               <div className="col status">{o.status}</div>
               <div className="col time">{o.executedAt ? new Date(o.executedAt).toLocaleString() : new Date(o.createdAt).toLocaleString()}</div>
+              <div style={{marginLeft:8}}>
+                {o.status === 'scheduled' && <button onClick={()=>{ axios.post(`/api/orders/${o.id}/cancel`).then(fetchOrders).catch(()=>alert('Cancel failed')) }}>Cancel</button>}
+              </div>
             </div>
           ))}
         </div>

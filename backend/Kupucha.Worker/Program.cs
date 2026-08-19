@@ -35,15 +35,33 @@ try
                 return;
             }
 
+            // Look up current order state in InMemoryStore
+            if (InMemoryStore.Orders.TryGetValue(order.Id, out var existing))
+            {
+                if (existing.Status == "cancelled")
+                {
+                    Console.WriteLine($"[Worker] Order {order.Id} is cancelled; acking and skipping.");
+                    channel.BasicAck(deliveryTag: ea.DeliveryTag, multiple: false);
+                    return;
+                }
+            }
+
             if (marketOpen)
             {
                 Console.WriteLine($"[Worker] Executing order: {order.Id} {order.Symbol} x{order.Quantity}");
                 // mark executed in InMemoryStore if present
-                if (InMemoryStore.Orders.TryGetValue(order.Id, out var existing))
+                if (InMemoryStore.Orders.TryGetValue(order.Id, out var existing2))
                 {
-                    var executed = existing with { Status = "executed", ExecutedAt = DateTime.UtcNow, ExecutedPrice = order.Price ?? existing.Price };
-                    InMemoryStore.Orders[order.Id] = executed;
-                    Console.WriteLine($"[Worker] Order {order.Id} marked executed.");
+                    if (existing2.Status != "cancelled")
+                    {
+                        var executed = existing2 with { Status = "executed", ExecutedAt = DateTime.UtcNow, ExecutedPrice = order.Price ?? existing2.Price };
+                        InMemoryStore.Orders[order.Id] = executed;
+                        Console.WriteLine($"[Worker] Order {order.Id} marked executed.");
+                    }
+                    else
+                    {
+                        Console.WriteLine($"[Worker] Order {order.Id} was cancelled before execution; acking.");
+                    }
                 }
 
                 channel.BasicAck(deliveryTag: ea.DeliveryTag, multiple: false);

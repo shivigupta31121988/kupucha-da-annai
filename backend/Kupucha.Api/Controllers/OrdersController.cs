@@ -65,6 +65,18 @@ public class OrdersController : ControllerBase
 
         return Ok(updated);
     }
+
+    [HttpPost("{id}/cancel")]
+    public IActionResult CancelOrder(Guid id)
+    {
+        if (!InMemoryStore.Orders.TryGetValue(id, out var existing)) return NotFound();
+        if (existing.Status == "executed") return BadRequest(new { error = "Order already executed" });
+
+        var updated = existing with { Status = "cancelled" };
+        InMemoryStore.Orders[id] = updated;
+
+        return Ok(updated);
+    }
 }
 
 public record OrderRequest
